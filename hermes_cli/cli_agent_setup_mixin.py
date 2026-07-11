@@ -174,12 +174,13 @@ class CLIAgentSetupMixin:
     def _resolve_turn_agent_config(self, user_message: str) -> dict:
         """Build the effective model/runtime config for a single user turn.
 
-        Always uses the session's primary model/provider.  If the user has
-        toggled `/fast` on and the current model supports Priority
-        Processing / Anthropic fast mode, attach `request_overrides` so the
-        API call is marked accordingly.
+        Model selection flows through the routing layer, which maps the user
+        message to a configured model. If the user has toggled `/fast` on and
+        the current model supports Priority Processing / Anthropic fast mode,
+        attach `request_overrides` so the API call is marked accordingly.
         """
         from hermes_cli.models import resolve_fast_mode_overrides
+        from .routing import choose_model, load_routing_config
 
         runtime = {
             "api_key": self.api_key,
@@ -190,11 +191,12 @@ class CLIAgentSetupMixin:
             "args": list(self.acp_args or []),
             "credential_pool": getattr(self, "_credential_pool", None),
         }
+        model = choose_model(user_message, load_routing_config(self.model))
         route = {
-            "model": self.model,
+            "model": model,
             "runtime": runtime,
             "signature": (
-                self.model,
+                model,
                 runtime["provider"],
                 runtime["base_url"],
                 runtime["api_mode"],
