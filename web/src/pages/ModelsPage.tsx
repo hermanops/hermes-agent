@@ -1072,7 +1072,7 @@ export default function ModelsPage() {
   // Gate the token/cost UI on `dashboard.show_token_analytics`.  See
   // hermes_cli/config.py for the rationale: the numbers exclude auxiliary
   // calls and retries, so they're misleading next to provider billing.
-  const [showTokens, setShowTokens] = useState(false);
+  const [showTokens, setShowTokens] = useState(true);
   const { t } = useI18n();
   const { setAfterTitle, setEnd } = usePageHeader();
 
